@@ -21,6 +21,14 @@ class Cell
     @revealed ? @num_neighbor_mines : nil
   end
 
+  def to_s
+    return '\u20DE' unless @revealed # an empty box
+
+    return '\u1F4A5' if @is_mine # an explosion symbol
+
+    @num_neighbor_mines == 0 ? '.' : @num_neighbor_mines
+  end
+
   private
 
   def count_neighboring_mines

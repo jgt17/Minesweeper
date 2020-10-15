@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #
 # a single position
 class Position
@@ -8,6 +9,7 @@ class Position
 
   def initialize(x_pos, y_pos, minefield = nil)
     return unless minefield.nil? || valid?(x_pos, y_pos, minefield)
+
     @x_pos = x_pos
     @y_pos = y_pos
   end

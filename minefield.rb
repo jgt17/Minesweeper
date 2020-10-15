@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './utilities'
+
 # The minefield
 class Minefield
   include Utilities
@@ -23,21 +25,38 @@ class Minefield
     Position.new rand(@width), rand(@height)
   end
 
+  def to_s
+    str = ''
+    @minefield.each do |row|
+      row.each { |cell| str += cell + ' ' }
+      str.delete_suffix!(' ')
+      str += '\n'
+    end
+    str.delete_suffix('\n')
+  end
+
   private
 
   def check_params(width, height, num_mines, first_click)
     check_integer_param width, :width
     check_integer_param height, :height
     check_integer_param num_mines, :num_mines
-    error_string = "Too many mines! #{num_mines} specified, but the minefield has an area of #{width * height}."
-    raise Error error_string unless num_mines < (width * height) * MAX_MINE_DENSITY
-
-    unless first_click.x_pos < width && first_click.y_pos < height
-      raise_out_of_range_error(first_click.x_pos, first_click.y_pos, width, height)
-    end
+    check_for_errors(width, height, num_mines, first_click)
     true
   end
 
+  # check the minefield params for general errors
+  def check_for_errors(width, height, num_mines, first_click)
+    error_string = "Too many mines! #{num_mines} specified, but the minefield has an area of #{width * height}."
+    raise Error error_string unless num_mines < (width * height) * MAX_MINE_DENSITY
+    raise Error 'first_click must be a position if provided!' unless first_click.nil? || first_click.is_a?(Position)
+
+    # noinspection RubyNilAnalysis
+    in_range = first_click.x_pos < width && first_click.y_pos < height
+    raise_out_of_range_error(first_click.x_pos, first_click.y_pos, width, height) unless first_click.nil? || in_range
+  end
+
+  # create the minefield
   def generate
     populate_trapped_cells
     populate_empty_cells
