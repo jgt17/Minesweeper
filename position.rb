@@ -8,7 +8,7 @@ class Position
   attr_reader :y_pos
 
   def initialize(x_pos, y_pos, minefield = nil)
-    return unless minefield.nil? || valid?(x_pos, y_pos, minefield)
+    raise Error "Position (#{@x_pos}, #{@y_pos}) is not in the minefield." unless minefield.nil? || valid?(minefield)
 
     @x_pos = x_pos
     @y_pos = y_pos
@@ -20,14 +20,11 @@ class Position
 
   private
 
-  def valid?(x_pos, y_pos, minefield)
-    return false unless check_integer_param x_pos, :x_pos
+  def valid?(minefield)
+    return false unless check_integer_param @x_pos, :x_pos
+    return false unless check_integer_param @y_pos, :y_pos
+    return false unless minefield.is_a?(Minefield) && minefield.pos_in_range?(self)
 
-    return false unless check_integer_param y_pos, :y_pos
-
-    if minefield.is_a?(Minefield) && (x_pos >= minefield.width || y_pos >= minefield.height)
-      raise_out_of_range_error(x_pos, y_pos, minefield.width, minefield.height)
-    end
     true
   end
 end

@@ -16,8 +16,4 @@ module Utilities
   def neighboring_ranges(val1, max1, val2, max2)
     [neighboring_range(val1, max1), neighboring_range(val2, max2)]
   end
-
-  def raise_out_of_range_error(x_pos, y_pos, width, height)
-    raise Error "Position out of range! (#{x_pos}, #{y_pos}) given, but the minefield is #{width} by #{height}."
-  end
 end

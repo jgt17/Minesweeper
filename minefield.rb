@@ -12,12 +12,12 @@ class Minefield
 
   def initialize(width = 30, height = 16, num_mines = 99, first_click = nil)
     # default to expert, random first click
-    check_params(width, height, num_mines, first_click)
-    @minefield = Array.new(width) { Array.new(height) }
     @width = width
     @height = height
     @num_mines = num_mines
-    @first_click ||= random_position
+    @first_click = first_click || random_position
+    check_params
+    @minefield = Array.new(width) { Array.new(height) }
     generate
   end
 
@@ -35,25 +35,45 @@ class Minefield
     str.delete_suffix('\n')
   end
 
+  def pos_in_range?(position)
+    raise Error 'Expected position.' unless position.is_a? Position
+
+    position.x_pos >= @width || position.y_pos >= @height
+  end
+
+  # raise an error if a given position is not valid for the minefield
+  def pos_out_of_range(position)
+    Error "Position out of range! (#{position.x_pos}, #{position.y_pos}) given, " \
+          "but the minefield is #{@width} by #{@height}."
+  end
+
   private
 
-  def check_params(width, height, num_mines, first_click)
-    check_integer_param width, :width
-    check_integer_param height, :height
-    check_integer_param num_mines, :num_mines
-    check_for_errors(width, height, num_mines, first_click)
+  # check that the params of the minefield are within accepted values
+  def check_params
+    check_integer_param @width, :width
+    check_integer_param @height, :height
+    check_integer_param @num_mines, :num_mines
+    validate_params
     true
   end
 
   # check the minefield params for general errors
-  def check_for_errors(width, height, num_mines, first_click)
-    error_string = "Too many mines! #{num_mines} specified, but the minefield has an area of #{width * height}."
-    raise Error error_string unless num_mines < (width * height) * MAX_MINE_DENSITY
-    raise Error 'first_click must be a position if provided!' unless first_click.nil? || first_click.is_a?(Position)
+  def validate_params
+    validate_mine_density
+    validate_first_click
+  end
 
-    # noinspection RubyNilAnalysis
-    in_range = first_click.x_pos < width && first_click.y_pos < height
-    raise_out_of_range_error(first_click.x_pos, first_click.y_pos, width, height) unless first_click.nil? || in_range
+  # check that there aren't too many mines
+  def validate_mine_density
+    error_string = "Too many mines! #{@num_mines} specified, but the minefield has an area of #{@width * @height}."
+    raise Error error_string unless @num_mines < (@width * @height) * MAX_MINE_DENSITY
+  end
+
+  # check that first_click is a position in the minefield
+  def validate_first_click
+    raise Error 'first_click must be a position if provided!' unless @first_click.nil? || @first_click.is_a?(Position)
+    raise pos_out_of_range(@first_click) unless pos_in_range?(@first_click)
   end
 
   # create the minefield
