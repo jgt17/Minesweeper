@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require './minefield'
+require './rectangular_minefield'
 
-minefield = Minefield.new
+minefield = RectangularMinefield.new
 puts minefield
 

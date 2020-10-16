@@ -3,8 +3,8 @@
 # various utility methods
 module Utilities
   def check_integer_param(param, param_name)
-    error_string = "#{param_name} must be a positive integer. Given #{param_name}: #{param}"
-    raise Error(error_string) unless param.is_a?(Integer) && param.positive?
+    error_string = "#{param_name} must be a non-negative integer. Given #{param_name}: '#{param}'"
+    raise error_string unless param.is_a?(Integer) && !param.negative?
 
     true
   end

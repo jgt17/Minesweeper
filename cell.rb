@@ -6,17 +6,24 @@ class Cell
   attr_reader :neighbors
   attr_reader :position
 
-  def initialize(position, is_mine = false)
+  def initialize(is_mine = false)
     @revealed = false
     @flagged = false
     @is_mine = is_mine
-    @position = position
+    @neighbors = []
+    # @hidden_symbol =
   end
 
-  # initialize the set of cells neighboring this one
-  def neighbors=(neighbors)
-    @neighbors ||= neighbors
-    @num_neighbor_mines = count_neighboring_mines unless @is_mine
+  # add a neighboring cell
+  def add_neighbor(other_cell)
+    raise Error 'Expected a cell' unless other_cell.is_a?(Cell)
+
+    @neighbors.append(other_cell)
+  end
+
+  # check if this cell and the other cell are neighbors
+  def neighbors?(other_cell)
+    @neighbors.include?(other_cell)
   end
 
   # attempt to access the number of mines neighboring this cell
@@ -25,10 +32,10 @@ class Cell
   end
 
   def to_s
-    return '\u20DE' unless @revealed # an empty box
-    return '\u1F4A5' if @is_mine # an explosion symbol
+    return '□' unless @revealed # an empty box
+    return '◈' if @is_mine # an explosion symbol
 
-    @num_neighbor_mines.zero? ? '.' : @num_neighbor_mines
+    @num_neighbor_mines.zero? ? '○' : @num_neighbor_mines
   end
 
   # reveal the contents of a cell
@@ -39,10 +46,15 @@ class Cell
     @is_mine ? nil : @num_neighbor_mines
   end
 
+  # set a cell to be a mine
+  def set_mine
+    @is_mine = true
+    @neighbors.each(&:incr_neighbor_mines)
+  end
+
   private
 
-  def count_neighboring_mines
-    n = 0
-    @neighbors.each { |neighbor| n += 1 if neighbor.is_mine }
+  def incr_neighbor_mines
+    @num_neighbor_mines += 1
   end
 end
