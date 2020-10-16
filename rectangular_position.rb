@@ -21,10 +21,14 @@ class RectangularPosition < Position
     attr_reader :max_height
   end
 
-  def initialize(x_pos, y_pos)
+  def initialize(x_pos, y_pos = nil)
+    unless y_pos
+      y_pos = x_pos % max_height
+      x_pos /= max_height
+    end
     @x_pos = x_pos
     @y_pos = y_pos
-    raise Error "RectangularPosition (#{@x_pos}, #{@y_pos}) is not in the minefield." unless valid?
+    return nil unless valid?
 
     super(y_pos * max_width + x_pos)
   end
@@ -33,8 +37,6 @@ class RectangularPosition < Position
     "(#{@x_pos}, #{@y_pos})"
   end
 
-  private
-
   def valid?
     return false unless check_integer_param @x_pos, :x_pos
     return false unless check_integer_param @y_pos, :y_pos
@@ -42,6 +44,8 @@ class RectangularPosition < Position
 
     true
   end
+
+  private
 
   def max_width
     self.class.max_width

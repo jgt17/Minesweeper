@@ -20,10 +20,6 @@ class RectangularMinefield < Minefield
     check_params
   end
 
-  def random_position
-    @position_class.new(rand(@width), rand(@height))
-  end
-
   def to_s
     str = +''
     (0...@height).each do |y|
@@ -68,7 +64,8 @@ class RectangularMinefield < Minefield
     x_neighbors, y_neighbors = neighboring_ranges(x_pos, y_pos, @width, @height)
     x_neighbors.each do |i|
       y_neighbors.each do |j|
-        cell.add_neighbor(cell_at(RectangularPosition(i, j))) unless i == x_pos && j == y_pos
+        pos = @position_class.new(i, j)
+        cell.add_neighbor(cell_at(pos)) unless !pos.nil? || (i == x_pos && j == y_pos)
       end
     end
   end

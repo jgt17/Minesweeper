@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # basic position
 class Position
   attr_reader :true_position

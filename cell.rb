@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 # class representing an individual cell of the minefield
 class Cell
   attr_accessor :revealed
-  attr_accessor :flagged
+  attr_reader :flagged
   attr_reader :is_mine
   attr_reader :neighbors
   attr_reader :position
@@ -11,7 +13,7 @@ class Cell
     @flagged = false
     @is_mine = is_mine
     @neighbors = []
-    # @hidden_symbol =
+    @num_neighbor_mines = 0
   end
 
   # add a neighboring cell
@@ -27,7 +29,7 @@ class Cell
   end
 
   # attempt to access the number of mines neighboring this cell
-  def num_neighboring_mines=
+  def num_neighboring_mines
     @revealed ? @num_neighbor_mines : nil
   end
 
@@ -46,10 +48,24 @@ class Cell
     @is_mine ? nil : @num_neighbor_mines
   end
 
+  # flag the cell, returns true if the cell was not already flagged
+  def flag
+    @flagged != @flagged = true
+  end
+
+  # unflag the cell, returns true if the cell was not already unflagged
+  def unflag
+    @flagged != @flagged = false
+  end
+
   # set a cell to be a mine
   def set_mine
     @is_mine = true
     @neighbors.each(&:incr_neighbor_mines)
+  end
+
+  def flagged?
+    @flagged
   end
 
   private
