@@ -45,6 +45,14 @@ class Fact
     decr_mines unless remove_cell(cell).nil?
   end
 
+  # compare two facts with respect to which is a higher priority to process
+  def compare_with(other)
+    raise 'expected a fact' unless other&.is_a?(Fact)
+    return other.certain? ? 0 : 1 if certain?
+
+    other.certain? ? -1 : safety <=> other.safety
+  end
+
   private
 
   # remove a cell from the fact, eg, when it is revealed or flagged
@@ -65,6 +73,7 @@ class Fact
   # other forces all cells in self not in other to be mines
   def intersection_forced_inferences(other, inferences)
     return unless @cells.intersect?(other.cells) && @mines_contained - other.mines_contained == (@cells - other.cells).size
+
     inferences.safe_add(Fact.new(@cells - other.cells, @mines_contained - other.mines_contained))
     inferences.safe_add(Fact.new(other.cells - @cells, 0))
     inferences.safe_add(Fact.new(other.cells & @cells, other.mines_contained))
