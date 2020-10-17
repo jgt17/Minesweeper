@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'set'
+
 # class representing an individual cell of the minefield
 class Cell
   attr_accessor :revealed
@@ -12,15 +14,17 @@ class Cell
     @revealed = false
     @flagged = false
     @is_mine = is_mine
-    @neighbors = []
+    @neighbors = Set.new
     @num_neighbor_mines = 0
   end
 
   # add a neighboring cell
   def add_neighbor(other_cell)
-    raise Error 'Expected a cell' unless other_cell.is_a?(Cell)
+    puts other_cell.nil?
+    raise 'Expected a cell' unless other_cell.is_a?(Cell)
 
-    @neighbors.append(other_cell)
+    puts 'adding neighbor'
+    @neighbors << other_cell
   end
 
   # check if this cell and the other cell are neighbors
@@ -34,10 +38,11 @@ class Cell
   end
 
   def to_s
+    return '▣' if @flagged
     return '□' unless @revealed # an empty box
     return '◈' if @is_mine # an explosion symbol
 
-    @num_neighbor_mines.zero? ? '○' : @num_neighbor_mines
+    @num_neighbor_mines.zero? ? '.' : @num_neighbor_mines.to_s
   end
 
   # reveal the contents of a cell
@@ -60,15 +65,15 @@ class Cell
 
   # set a cell to be a mine
   def set_mine
-    @is_mine = true
+    return false if @is_mine
+
     @neighbors.each(&:incr_neighbor_mines)
+    @is_mine = true
   end
 
   def flagged?
     @flagged
   end
-
-  private
 
   def incr_neighbor_mines
     @num_neighbor_mines += 1

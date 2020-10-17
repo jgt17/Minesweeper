@@ -23,12 +23,11 @@ class RectangularPosition < Position
 
   def initialize(x_pos, y_pos = nil)
     unless y_pos
-      y_pos = x_pos % max_height
-      x_pos /= max_height
+      x_pos = x_pos % max_height
+      y_pos = x_pos / max_height
     end
     @x_pos = x_pos
     @y_pos = y_pos
-    return nil unless valid?
 
     super(y_pos * max_width + x_pos)
   end

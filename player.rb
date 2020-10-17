@@ -9,6 +9,7 @@ class Player
     raise 'Expected a minefield' unless minefield.is_a? Minefield
 
     @minefield = minefield
+    @minefield.player = self
     @position_type = minefield.position_class
   end
 
@@ -28,7 +29,10 @@ class Player
     puts @minefield.clear?
     reveal @minefield.cell_at(@minefield.first_click)
     make_move until @minefield.clear?
+    puts 'Victory!'
   end
+
+  def notify_revealed(cell); end
 
   def make_move
     raise 'No strategy defined.'

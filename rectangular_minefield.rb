@@ -24,9 +24,9 @@ class RectangularMinefield < Minefield
     str = +''
     (0...@height).each do |y|
       (0...@width).each do |x|
-        str << cell_at(@position_class.new(x, y)).to_s << '     '
+        str << cell_at(@position_class.new(x, y)).to_s << '   '
       end
-      str.delete_suffix!('     ')
+      str.delete_suffix!('   ')
       str << "\n"
     end
     str.delete_suffix("\n")
@@ -61,11 +61,12 @@ class RectangularMinefield < Minefield
   # returns an array of cells that neighbor the cell at (x, y)
   def gather_neighbors(x_pos, y_pos)
     cell = cell_at(@position_class.new(x_pos, y_pos))
-    x_neighbors, y_neighbors = neighboring_ranges(x_pos, y_pos, @width, @height)
+    x_neighbors, y_neighbors = neighboring_ranges(x_pos, @width, y_pos, @height)
     x_neighbors.each do |i|
       y_neighbors.each do |j|
         pos = @position_class.new(i, j)
-        cell.add_neighbor(cell_at(pos)) unless !pos.nil? || (i == x_pos && j == y_pos)
+        puts pos
+        cell.add_neighbor(cell_at(pos)) unless pos.nil? || (i == x_pos && j == y_pos)
       end
     end
   end

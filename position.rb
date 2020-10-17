@@ -7,4 +7,8 @@ class Position
   def initialize(index)
     @true_position = index
   end
+
+  def ==(other)
+    other.is_a?(Position) && @true_position == other.true_position
+  end
 end

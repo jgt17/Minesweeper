@@ -10,7 +10,7 @@ module Utilities
   end
 
   def neighboring_range(val, max)
-    ((val - 1 >= 0 ? val - 1 : 0)..(val + 1 < max ? val + 1 : max))
+    ((val - 1 >= 0 ? val - 1 : 0)..(val + 1 < max ? val + 1 : max - 1))
   end
 
   def neighboring_ranges(val1, max1, val2, max2)
