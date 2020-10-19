@@ -14,10 +14,13 @@ class Fact
   end
 
   # attempt to infer new facts by combining this fact with another one
+  # NOT commutative
   def infer(other)
     raise "expected a Fact, got #{other}" unless other&.is_a?(Fact)
 
     inferences = Set.new
+    return inferences if other.empty? || other == self # don't make inferences from empty or equivalent facts
+
     superset_inferences(other, inferences)
     intersection_forced_inferences(other, inferences)
     inferences
@@ -53,6 +56,12 @@ class Fact
     other.certain? ? -1 : safety <=> other.safety
   end
 
+  def empty?
+    raise "Fact is empty but has #{@mines_contained} mines" unless @mines_contained == 0 || !@cells.empty?
+
+    @cells.empty?
+  end
+
   private
 
   # remove a cell from the fact, eg, when it is revealed or flagged
@@ -72,10 +81,14 @@ class Fact
 
   # other forces all cells in self not in other to be mines
   def intersection_forced_inferences(other, inferences)
-    return unless @cells.intersect?(other.cells) && @mines_contained - other.mines_contained == (@cells - other.cells).size
+    return unless intersect_but_not_superset?(other)
 
     inferences.safe_add(Fact.new(@cells - other.cells, @mines_contained - other.mines_contained))
     inferences.safe_add(Fact.new(other.cells - @cells, 0))
     inferences.safe_add(Fact.new(other.cells & @cells, other.mines_contained))
+  end
+
+  def intersect_but_not_superset?(other)
+    @cells.intersect?(other.cells) && @mines_contained - other.mines_contained == (@cells - other.cells).size
   end
 end

@@ -4,8 +4,6 @@ require 'set'
 
 # class representing an individual cell of the minefield
 class Cell
-  attr_accessor :revealed
-  attr_reader :flagged
   attr_reader :is_mine
   attr_reader :neighbors
   attr_reader :position
@@ -75,7 +73,15 @@ class Cell
     @flagged
   end
 
+  def revealed?
+    @revealed
+  end
+
   def incr_neighbor_mines
     @num_neighbor_mines += 1
+  end
+
+  def hidden_and_unflagged_neighbors
+    @neighbors.select { |n| !n.revealed? && !n.flagged?}
   end
 end

@@ -11,8 +11,11 @@ class FactHeap
     @heap.length
   end
 
-  def push(cell)
-    @heap.push(cell)
+  def push(fact)
+    # don't add empty or equivalent facts to the heap
+    return if fact.empty? || @heap.include?(fact)
+
+    @heap.push(fact)
     sift_up(-1)
   end
 
@@ -36,7 +39,28 @@ class FactHeap
     @heap[cell_index].compare_with(fact) ? sift_up(cell_index) : sift_down(cell_index)
   end
 
+  # might not need each
+  def each(&block)
+    @heap.each(&block)
+  end
+
+  def reveal_or_flag_cell(cell, flagged)
+    flagged ? @heap.each { |fact| fact.flag_cell(cell) } : @heap.each { |fact| fact.reveal_cell(cell) }
+    prune
+  end
+
+  def infer
+    new_facts = []
+    @heap.each { |fact| @heap.each { |other| new_facts.append(fact.infer(other)) } } # inferences are not commutative
+    new_facts.each { |fact| @heap.push(fact) }
+  end
+
   private
+
+  # remove now-empty facts from the heap
+  def prune
+    @heap.select(&:empty?).each { |fact| delete(fact) }
+  end
 
   def sift_up(index)
     parent = parent(index)
