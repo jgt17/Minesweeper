@@ -4,7 +4,6 @@ require 'set'
 
 # class representing an individual cell of the minefield
 class Cell
-  attr_reader :is_mine
   attr_reader :neighbors
   attr_reader :position
 
@@ -19,8 +18,10 @@ class Cell
   # add a neighboring cell
   def add_neighbor(other_cell)
     raise 'Expected a cell' unless other_cell.is_a?(Cell)
+    raise 'A cell cannot neighbor itself' if other_cell == self
 
     @neighbors << other_cell
+    incr_neighbor_mines if other_cell.mine?
   end
 
   # check if this cell and the other cell are neighbors
@@ -64,11 +65,14 @@ class Cell
   def set_mine
     return false if @is_mine
 
-    @neighbors.each(&:incr_neighbor_mines)
+    # rubocop:disable Style/SymbolProc
+    @neighbors.each { |n| n.incr_neighbor_mines }
+    # @neighbors.each(&:incr_neighbor_mines) raises a method not found error
+    # rubocop:enable Style/SymbolProc
     @is_mine = true
   end
 
-  #check if a cell has been flagged
+  # check if a cell has been flagged
   def flagged?
     @flagged
   end
@@ -78,15 +82,21 @@ class Cell
     @revealed
   end
 
-  def incr_neighbor_mines
-    @num_neighbor_mines += 1
-  end
-
   def hidden_and_unflagged_neighbors
     Set.new(@neighbors.select { |n| !n.revealed? && !n.flagged? })
   end
 
   def flagged_neighbors
     Set.new(@neighbors.select(&:flagged?))
+  end
+
+  protected
+
+  def mine?
+    @is_mine
+  end
+
+  def incr_neighbor_mines
+    @num_neighbor_mines += 1
   end
 end
