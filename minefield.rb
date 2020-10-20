@@ -17,16 +17,19 @@ class Minefield
   def initialize(num_cells, num_mines, first_click = nil)
     @minefield = Array.new(num_cells) { Cell.new }
     @num_mines = num_mines
+    @num_cells = num_cells
     @first_click = first_click || random_position
     @num_to_clear = num_cells - num_mines
     @num_flagged = 0
-    @num_cells = num_cells
     @player = nil
     generate
   end
 
   # get a random cell in the minefield
   def random_position
+    puts 'num cells'
+    puts @num_cells
+    puts rand(@num_cells)
     position_class.new(rand(@num_cells))
   end
 
@@ -44,11 +47,10 @@ class Minefield
     return puts('Attempted to reveal cell not in minefield') && false unless include?(cell)
 
     neighbor_mine_count = cell.reveal
-    trip_mine if neighbor_mine_count.nil?
+    return trip_mine if neighbor_mine_count.nil?
 
     # don't update revealed data if the cell was not successfully revealed
     # ie, if the cell was flagged or had already been revealed
-    puts neighbor_mine_count
     return if neighbor_mine_count == false
 
     @num_to_clear -= 1
@@ -85,10 +87,8 @@ class Minefield
   end
 
   def all_cells
-    puts 'grabbing all cells'
     all = Set.new
-    @minefield.each { |cell| all.add(cell); puts 'adding cell' }
-    puts 'done'
+    @minefield.each { |cell| all.add(cell)}
     all
   end
 
@@ -104,11 +104,10 @@ class Minefield
   def populate_trapped_cells
     mines_laid = 0
     until mines_laid == @num_mines
-      puts 'laying mine'
-      pos = position_class.new(rand(@num_cells))
+      pos = random_position
+      puts @first_click
       puts pos
-      puts pos.true_position
-      puts cell_at(pos).nil?
+      puts pos != @first_click
       mines_laid += 1 if pos != @first_click && !cell_at(pos).neighbors?(cell_at(@first_click)) && cell_at(pos).set_mine
     end
   end
@@ -161,9 +160,7 @@ class Minefield
 
   # continue revealing cells as long as they have no neighboring mines
   def cascade_reveal(cell)
-    puts 'cascade revealing'
     cell.neighbors.each do |n|
-      puts "revealing #{n}" unless n.revealed?
       reveal(n) unless n.revealed?
     end
   end

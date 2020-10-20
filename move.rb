@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# for returning a full move specification, including which cell to modify and how to modify it
 class Move
   attr_reader :cell
 
@@ -8,5 +11,9 @@ class Move
 
   def flag?
     @flag
+  end
+
+  def to_s
+    @flag ? "Flag #{cell}" : "Reveal #{cell}"
   end
 end

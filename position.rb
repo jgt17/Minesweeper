@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # basic position
+# extended to map coordinates in different minefield topologies to the corresponding index in the underlying array
 class Position
   attr_reader :true_position
 

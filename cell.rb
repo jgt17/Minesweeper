@@ -18,10 +18,8 @@ class Cell
 
   # add a neighboring cell
   def add_neighbor(other_cell)
-    puts other_cell.nil?
     raise 'Expected a cell' unless other_cell.is_a?(Cell)
 
-    puts 'adding neighbor'
     @neighbors << other_cell
   end
 
@@ -35,6 +33,7 @@ class Cell
     @revealed ? @num_neighbor_mines : nil
   end
 
+  # string representation for displaying the minefield in the console
   def to_s
     return '▣' if @flagged
     return '□' unless @revealed # an empty box
@@ -69,10 +68,12 @@ class Cell
     @is_mine = true
   end
 
+  #check if a cell has been flagged
   def flagged?
     @flagged
   end
 
+  # check if a cell has been revealed
   def revealed?
     @revealed
   end
@@ -82,8 +83,6 @@ class Cell
   end
 
   def hidden_and_unflagged_neighbors
-    puts 'neighbors'
-    puts(@neighbors.select { |n| !n.revealed? && !n.flagged? })
     Set.new(@neighbors.select { |n| !n.revealed? && !n.flagged? })
   end
 

@@ -36,11 +36,14 @@ class FactHeap
     # raise "attempted to delete a cell that doesn't exist" if cell_index.nil?
     return nil if cell_index.nil?
 
-    puts 'deleting'
     swap(cell_index, -1)
     @heap.pop
-    unless cell_index == @heap.length
-      @heap[cell_index].compare_with(fact) ? sift_up(cell_index) : sift_down(cell_index)
+    return fact if cell_index == @heap.length
+
+    if cell_index.positive? && @heap[parent(cell_index)].compare_with(@heap[cell_index]).positive?
+      sift_up(cell_index)
+    else
+      sift_down(cell_index)
     end
     fact
   end
@@ -58,23 +61,13 @@ class FactHeap
     updated.uniq!
     updated.each { |fact| delete(fact) }
     updated.each { |fact| push(fact) unless fact.nil? }
-    puts 'facts'
-    puts @heap
   end
 
   def infer
-    puts 'inferring'
     new_facts = []
-    puts @heap
-    @heap.each { |fact| @heap.each { |other| new_facts.concat(fact.infer(other) - @heap) } }
+    @heap.each { |fact| @heap.each { |other| new_facts.concat(fact.infer(other).reject(&:empty?) - @heap) } }
     # inferences are not commutative
-    puts 'done inferring'
-    puts 'new facts'
-    puts new_facts
-    # puts "new facts: #{new_facts}"
     new_facts.each { |fact| push(fact) }
-    puts 'facts'
-    puts @heap
     new_facts.length.zero? ? nil : new_facts
   end
 
@@ -86,7 +79,6 @@ class FactHeap
 
   # remove now-empty facts from the heap
   def prune
-    puts 'pruning'
     @heap.select(&:empty?).each { |fact| delete(fact) }
   end
 
@@ -95,12 +87,6 @@ class FactHeap
     parent = parent(index)
     return index if parent.nil?
 
-    puts 'comparing'
-    puts index
-    puts @heap[index]
-    puts parent
-    puts @heap[parent]
-    puts @heap[index].compare_with(@heap[parent])
     return index unless @heap[index].compare_with(@heap[parent]).positive?
 
     swap(index, parent)

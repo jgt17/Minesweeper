@@ -15,10 +15,11 @@ class Player
     raise 'Already playing a game!' unless @minefield == @dummy_minefield
 
     setup(minefield)
-    reveal @minefield.cell_at(@minefield.first_click)
     puts @minefield
+    reveal @minefield.cell_at(@minefield.first_click)
     make_move(choose_move) until @minefield.clear?
     puts 'Victory!'
+    puts @minefield
     clean_up
   end
 
@@ -56,8 +57,12 @@ class Player
 
   # "click" a cell
   def reveal(cell)
-    announce_reveal(cell)
-    @minefield.reveal(cell) unless cell.flagged?
+    if cell.flagged?
+      puts 'Attempted to reveal flagged cell.'
+    else
+      announce_reveal(cell)
+      @minefield.reveal(cell)
+    end
   end
 
   # mark a cell as a mine without revealing it
@@ -85,7 +90,6 @@ class Player
   end
 
   def make_move(move)
-    puts move.flag?
     move.flag? ? flag(move.cell) : reveal(move.cell)
   end
 end

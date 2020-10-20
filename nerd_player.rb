@@ -8,7 +8,6 @@ require './move'
 # a player that uses facts to make inferences and play intelligently
 class NerdPlayer < Player
   def initialize
-    puts 'creating player'
     super
     @facts = FactHeap.new
     @move_queue = []
@@ -23,30 +22,27 @@ class NerdPlayer < Player
   protected
 
   def choose_move
+    puts @minefield
     puts 'choosing move'
+    puts 'move queue'
+    puts @move_queue.empty? ? '[]' : @move_queue
     return make_move_from_queue unless @move_queue.empty?
 
     until @facts.peek.certain? || !infer; end
     puts 'made some inferences'
-    puts @minefield
     puts 'facts'
     @facts.puts_heap
     flag = @facts.peek.safety.zero?
-    puts @facts.peek
-    @facts.peek.certain? ? @facts.pop.cells.to_a.each { |cell| puts 'iterating'; @move_queue.push(Move.new(cell, flag)) } : @move_queue.push(Move.new(Set.new(@facts.peek.cells).to_a.sample, false))
-    puts @move_queue
+    @facts.peek.certain? ? @facts.pop.cells.to_a.each { |cell| @move_queue.push(Move.new(cell, flag)) } : @move_queue.push(Move.new(Set.new(@facts.peek.cells).to_a.sample, false))
     make_move_from_queue
   end
 
   def setup(minefield)
-    puts 'setting up'
     super
     @facts = FactHeap.new
     # initialize the FactHeap with the entire board
     # needed for some edge cases
-    puts 'made fact heap'
     @facts.push(Fact.new(@minefield.all_cells, @minefield.num_mines))
-    puts 'added global fact'
     @move_queue = []
   end
 

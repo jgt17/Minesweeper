@@ -9,18 +9,15 @@ class Fact
   attr_reader :mines_contained
 
   def initialize(cells = Set.new, mines_contained = 0)
-    puts 'new fact!'
     raise 'Expected a set' unless cells.is_a?(Set)
 
     @cells = cells
     @mines_contained = mines_contained
-    puts self
   end
 
   # attempt to infer new facts by combining this fact with another one
   # NOT commutative
   def infer(other)
-    puts 'unit inferring'
     raise "expected a Fact, got #{other}" unless other&.is_a?(Fact)
 
     inferences = []
@@ -102,7 +99,7 @@ class Fact
   end
 
   def intersect_but_no_superset(other)
-    @cells.intersect?(other.cells) && !(other.cells > @cells) && !(@cells > other.cells)
+    !@cells.intersect?(other.cells) && !(other.cells > @cells || @cells > other.cells)
   end
 
   def size_diff_matches_mine_diff(other)

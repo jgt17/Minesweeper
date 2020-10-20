@@ -65,7 +65,6 @@ class RectangularMinefield < Minefield
     x_neighbors.each do |i|
       y_neighbors.each do |j|
         pos = @position_class.new(i, j)
-        puts pos
         cell.add_neighbor(cell_at(pos)) unless pos.nil? || (i == x_pos && j == y_pos)
       end
     end
