@@ -90,6 +90,10 @@ class Minefield
     all
   end
 
+  def hidden_and_unflagged_cells
+    Set.new(@minefield.reject { |cell| cell.revealed? || cell.flagged? } )
+  end
+
   private
 
   # populate the minefield

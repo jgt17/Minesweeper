@@ -8,7 +8,7 @@ require 'set'
 
 include Displays
 
-minefield = RectangularMinefield.new(16, 16, 40)
+minefield = RectangularMinefield.new(30, 16, 99)
 puts DISPLAY
 DISPLAY.call minefield
 sheldon = NerdPlayer.new

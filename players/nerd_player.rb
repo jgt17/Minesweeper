@@ -24,17 +24,26 @@ class NerdPlayer < Player
 
   def choose_move
     DISPLAY.call @minefield
+    DISPLAY.call "#{@minefield.num_flagged} mines flagged"
     DISPLAY.call 'Choosing Move'
     DISPLAY.call 'Move Queue'
     DISPLAY.call @move_queue.empty? ? '[]' : @move_queue
     return make_move_from_queue unless @move_queue.empty?
 
+    inject_global_fact if @facts.peek.nil?
+    # excluding the global fact unless it's needed massively reduces the size of the fact_heap
+
     until @facts.peek.certain? || !infer; end
     DISPLAY.call 'Made some inferences'
     DISPLAY.call 'Facts'
     @facts.display_heap
+    unless @facts.peek.certain? || @global_fact_added
+      inject_global_fact
+      return choose_move
+    end
     flag = @facts.peek.safety.zero?
     @facts.peek.certain? ? @facts.pop.cells.to_a.each { |cell| @move_queue.push(Move.new(cell, flag)) } : @move_queue.push(Move.new(Set.new(@facts.peek.cells).to_a.sample, false))
+    DISPLAY.call 'Move Queue'
     DISPLAY.call @move_queue.empty? ? '[]' : @move_queue
     make_move_from_queue
   end
@@ -46,6 +55,7 @@ class NerdPlayer < Player
     # needed for some edge cases
     # @facts.push(Fact.new(@minefield.all_cells, @minefield.num_mines))
     @move_queue = []
+    @global_fact_added = false
   end
 
   def clean_up
@@ -75,5 +85,14 @@ class NerdPlayer < Player
 
   def infer
     @facts.infer
+  end
+
+  def inject_global_fact
+    return if @global_fact_added
+
+    DISPLAY.call 'Injecting Global Fact'
+    @facts.push(Fact.new(@minefield.hidden_and_unflagged_cells, @minefield.num_mines - @minefield.num_flagged))
+    @global_fact_added = true
+    puts @facts
   end
 end
