@@ -4,6 +4,7 @@ require './fact'
 require './fact_heap'
 require './cell'
 require './move'
+require './display'
 
 # a player that uses facts to make inferences and play intelligently
 class NerdPlayer < Player
@@ -22,18 +23,19 @@ class NerdPlayer < Player
   protected
 
   def choose_move
-    puts @minefield
-    puts 'choosing move'
-    puts 'move queue'
-    puts @move_queue.empty? ? '[]' : @move_queue
+    DISPLAY.call @minefield
+    DISPLAY.call 'Choosing Move'
+    DISPLAY.call 'Move Queue'
+    DISPLAY.call @move_queue.empty? ? '[]' : @move_queue
     return make_move_from_queue unless @move_queue.empty?
 
     until @facts.peek.certain? || !infer; end
-    puts 'made some inferences'
-    puts 'facts'
-    @facts.puts_heap
+    DISPLAY.call 'Made some inferences'
+    DISPLAY.call 'Facts'
+    @facts.display_heap
     flag = @facts.peek.safety.zero?
     @facts.peek.certain? ? @facts.pop.cells.to_a.each { |cell| @move_queue.push(Move.new(cell, flag)) } : @move_queue.push(Move.new(Set.new(@facts.peek.cells).to_a.sample, false))
+    DISPLAY.call @move_queue.empty? ? '[]' : @move_queue
     make_move_from_queue
   end
 

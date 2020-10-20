@@ -2,6 +2,7 @@
 
 require './player'
 require 'set'
+require './display'
 
 # a player that guesses randomly and un-intelligently
 class RandomPlayer < Player
@@ -15,9 +16,9 @@ class RandomPlayer < Player
   end
 
   def choose_move
-    puts @minefield
+    DISPLAY.call @minefield
     cell = @unrevealed_cells.sample
-    puts "Guessing #{@minefield.position_of(cell)} is safe."
+    DISPLAY.call "Guessing #{@minefield.position_of(cell)} is safe."
     Move.new(cell, false)
   end
 

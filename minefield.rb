@@ -2,6 +2,7 @@
 
 require 'set'
 require './cell'
+require './display'
 
 # basic minefield, no neighbor topology
 # allows expanding to rectangular and other configurations (hex, triangles)
@@ -27,9 +28,6 @@ class Minefield
 
   # get a random cell in the minefield
   def random_position
-    puts 'num cells'
-    puts @num_cells
-    puts rand(@num_cells)
     position_class.new(rand(@num_cells))
   end
 
@@ -44,7 +42,7 @@ class Minefield
 
   # 'click' a hidden cell
   def reveal(cell)
-    return puts('Attempted to reveal cell not in minefield') && false unless include?(cell)
+    return DISPLAY.call('Attempted to reveal cell not in minefield') && false unless include?(cell)
 
     neighbor_mine_count = cell.reveal
     return trip_mine if neighbor_mine_count.nil?
@@ -60,14 +58,14 @@ class Minefield
 
   # flag the indicated cell
   def flag(cell)
-    return puts('Attempted to reveal cell not in minefield') && false unless include?(cell)
+    return DISPLAY.call('Attempted to flag cell not in minefield') && false unless include?(cell)
 
     @num_flagged += 1 if cell.flag
   end
 
   # unflag the indicated cell
   def unflag(cell)
-    return puts('Attempted to reveal cell not in minefield') && false unless include?(cell)
+    return DISPLAY.call('Attempted to unflag cell not in minefield') && false unless include?(cell)
 
     @num_flagged -= 1 if cell.unflag
   end
@@ -105,9 +103,6 @@ class Minefield
     mines_laid = 0
     until mines_laid == @num_mines
       pos = random_position
-      puts @first_click
-      puts pos
-      puts pos != @first_click
       mines_laid += 1 if pos != @first_click && !cell_at(pos).neighbors?(cell_at(@first_click)) && cell_at(pos).set_mine
     end
   end
@@ -153,8 +148,8 @@ class Minefield
 
   # kaboom
   def trip_mine
-    puts 'Revealed a Mine!'
-    puts self
+    DISPLAY.call 'Revealed a Mine!'
+    DISPLAY.call self
     exit 5
   end
 

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './display'
+
 # implements a binary heap of Facts on an Array
 # certainty is considered first, then safety
 class FactHeap
@@ -13,7 +15,6 @@ class FactHeap
 
   def push(fact)
     # don't add empty or equivalent facts to the heap
-    puts "pushing #{fact}"
     return if fact.nil? || fact.empty? || @heap.include?(fact)
 
     @heap.push(fact)
@@ -71,8 +72,8 @@ class FactHeap
     new_facts.length.zero? ? nil : new_facts
   end
 
-  def puts_heap
-    puts @heap
+  def display_heap
+    DISPLAY.call @heap
   end
 
   private

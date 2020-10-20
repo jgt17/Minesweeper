@@ -2,6 +2,7 @@
 
 require './minefield'
 require './cell'
+require './display'
 
 # abstract player
 class Player
@@ -15,11 +16,11 @@ class Player
     raise 'Already playing a game!' unless @minefield == @dummy_minefield
 
     setup(minefield)
-    puts @minefield
+    DISPLAY.call @minefield
     reveal @minefield.cell_at(@minefield.first_click)
     make_move(choose_move) until @minefield.clear?
-    puts 'Victory!'
-    puts @minefield
+    DISPLAY.call 'Victory!'
+    DISPLAY.call @minefield
     clean_up
   end
 
@@ -58,7 +59,7 @@ class Player
   # "click" a cell
   def reveal(cell)
     if cell.flagged?
-      puts 'Attempted to reveal flagged cell.'
+      DISPLAY.call 'Attempted to reveal flagged cell.'
     else
       announce_reveal(cell)
       @minefield.reveal(cell)
@@ -78,15 +79,15 @@ class Player
   end
 
   def announce_reveal(cell)
-    puts "Revealing #{@minefield.position_of(cell)}"
+    DISPLAY.call "Revealing #{@minefield.position_of(cell)}"
   end
 
   def announce_flag(cell)
-    puts "Flagging #{@minefield.position_of(cell)}"
+    DISPLAY.call "Flagging #{@minefield.position_of(cell)}"
   end
 
   def announce_unflag(cell)
-    puts "Unflagging #{@minefield.position_of(cell)}"
+    DISPLAY.call "Unflagging #{@minefield.position_of(cell)}"
   end
 
   def make_move(move)
