@@ -18,7 +18,7 @@ class RandomPlayer < Player
     puts @minefield
     cell = @unrevealed_cells.sample
     puts "Guessing #{@minefield.position_of(cell)} is safe."
-    reveal(cell)
+    Move.new(cell, false)
   end
 
   def setup(minefield)

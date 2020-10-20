@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-require './core_extensions'
 require './fact'
 require './fact_heap'
 require './cell'
+require './move'
 
 # a player that uses facts to make inferences and play intelligently
 class NerdPlayer < Player
   def initialize
+    puts 'creating player'
     super
     @facts = FactHeap.new
     @move_queue = []
@@ -15,27 +16,37 @@ class NerdPlayer < Player
 
   def notify_revealed(cell)
     remove_cell_from_facts(cell)
+    @move_queue.delete(cell)
     add_fact_from_cell(cell)
   end
 
   protected
 
   def choose_move
-    return make_move_from_queue unless @move_queue.empty
+    puts 'choosing move'
+    return make_move_from_queue unless @move_queue.empty?
 
     until @facts.peek.certain? || !infer; end
-
-    flag = safety.zero?
-    @facts.pop.each { |cell| @move_queue.push(Move.new(cell, flag)) }
+    puts 'made some inferences'
+    puts @minefield
+    puts 'facts'
+    @facts.puts_heap
+    flag = @facts.peek.safety.zero?
+    puts @facts.peek
+    @facts.peek.certain? ? @facts.pop.cells.to_a.each { |cell| puts 'iterating'; @move_queue.push(Move.new(cell, flag)) } : @move_queue.push(Move.new(Set.new(@facts.peek.cells).to_a.sample, false))
+    puts @move_queue
     make_move_from_queue
   end
 
   def setup(minefield)
+    puts 'setting up'
     super
     @facts = FactHeap.new
     # initialize the FactHeap with the entire board
     # needed for some edge cases
-    @facts.push(Fact(@minefield.all_cells.to_set, @minefield.num_mines))
+    puts 'made fact heap'
+    @facts.push(Fact.new(@minefield.all_cells, @minefield.num_mines))
+    puts 'added global fact'
     @move_queue = []
   end
 
@@ -59,7 +70,9 @@ class NerdPlayer < Player
   end
 
   def add_fact_from_cell(cell)
-    @facts.push(Fact.new(cell.hidden_and_unflagged_neighbors, cell.num_neighboring_mines))
+    fact = Fact.new(cell.hidden_and_unflagged_neighbors,
+                    cell.num_neighboring_mines - cell.flagged_neighbors.length)
+    @facts.push(fact) unless fact.empty?
   end
 
   def infer

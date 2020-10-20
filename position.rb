@@ -11,4 +11,6 @@ class Position
   def ==(other)
     other.is_a?(Position) && @true_position == other.true_position
   end
+
+  alias eql? ==
 end

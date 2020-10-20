@@ -13,7 +13,8 @@ class FactHeap
 
   def push(fact)
     # don't add empty or equivalent facts to the heap
-    return if fact.empty? || @heap.include?(fact)
+    puts "pushing #{fact}"
+    return if fact.nil? || fact.empty? || @heap.include?(fact)
 
     @heap.push(fact)
     sift_up(-1)
@@ -32,11 +33,16 @@ class FactHeap
 
   def delete(fact)
     cell_index = @heap.index(fact)
-    raise "attempted to delete a cell that doesn't exist" if cell_index.nil?
+    # raise "attempted to delete a cell that doesn't exist" if cell_index.nil?
+    return nil if cell_index.nil?
 
+    puts 'deleting'
     swap(cell_index, -1)
     @heap.pop
-    @heap[cell_index].compare_with(fact) ? sift_up(cell_index) : sift_down(cell_index)
+    unless cell_index == @heap.length
+      @heap[cell_index].compare_with(fact) ? sift_up(cell_index) : sift_down(cell_index)
+    end
+    fact
   end
 
   # might not need each
@@ -45,26 +51,56 @@ class FactHeap
   end
 
   def reveal_or_flag_cell(cell, flagged)
-    flagged ? @heap.each { |fact| fact.flag_cell(cell) } : @heap.each { |fact| fact.reveal_cell(cell) }
+    updated = []
+    flag_or_reveal = flagged ? Fact.instance_method(:flag_cell) : Fact.instance_method(:reveal_cell)
+    @heap.each { |fact| updated.append(fact) if flag_or_reveal.bind(fact).call(cell) }
     prune
+    updated.uniq!
+    updated.each { |fact| delete(fact) }
+    updated.each { |fact| push(fact) unless fact.nil? }
+    puts 'facts'
+    puts @heap
   end
 
   def infer
+    puts 'inferring'
     new_facts = []
-    @heap.each { |fact| @heap.each { |other| new_facts.append(fact.infer(other)) } } # inferences are not commutative
-    new_facts.each { |fact| @heap.push(fact) }
+    puts @heap
+    @heap.each { |fact| @heap.each { |other| new_facts.concat(fact.infer(other) - @heap) } }
+    # inferences are not commutative
+    puts 'done inferring'
+    puts 'new facts'
+    puts new_facts
+    # puts "new facts: #{new_facts}"
+    new_facts.each { |fact| push(fact) }
+    puts 'facts'
+    puts @heap
+    new_facts.length.zero? ? nil : new_facts
+  end
+
+  def puts_heap
+    puts @heap
   end
 
   private
 
   # remove now-empty facts from the heap
   def prune
+    puts 'pruning'
     @heap.select(&:empty?).each { |fact| delete(fact) }
   end
 
   def sift_up(index)
+    index += @heap.length if index.negative?
     parent = parent(index)
     return index if parent.nil?
+
+    puts 'comparing'
+    puts index
+    puts @heap[index]
+    puts parent
+    puts @heap[parent]
+    puts @heap[index].compare_with(@heap[parent])
     return index unless @heap[index].compare_with(@heap[parent]).positive?
 
     swap(index, parent)
@@ -72,6 +108,7 @@ class FactHeap
   end
 
   def sift_down(index)
+    index += @heap.length if index.negative?
     left = left_child(index)
     return index if left.nil?
 
@@ -90,16 +127,19 @@ class FactHeap
   end
 
   def parent(index)
+    index += @heap.length if index.negative?
     index.zero? ? nil : (index - 1) / 2
   end
 
   def left_child(index)
+    index += @heap.length if index.negative?
     left_child = 2 * index + 1
-    left_child < length ? left_child : nil
+    left_child < @heap.length ? left_child : nil
   end
 
   def right_child(index)
-    right_child = 2 * index + 1
-    right_child < length ? right_child : nil
+    index += @heap.length if index.negative?
+    right_child = 2 * index + 2
+    right_child < @heap.length ? right_child : nil
   end
 end

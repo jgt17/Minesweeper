@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './core_extensions'
+require 'set'
 
 # the individual nuggets of knowledge Nerd_Player reasons with
 # can be combined under certain circumstances to infer new facts
@@ -9,21 +9,26 @@ class Fact
   attr_reader :mines_contained
 
   def initialize(cells = Set.new, mines_contained = 0)
+    puts 'new fact!'
+    raise 'Expected a set' unless cells.is_a?(Set)
+
     @cells = cells
     @mines_contained = mines_contained
+    puts self
   end
 
   # attempt to infer new facts by combining this fact with another one
   # NOT commutative
   def infer(other)
+    puts 'unit inferring'
     raise "expected a Fact, got #{other}" unless other&.is_a?(Fact)
 
-    inferences = Set.new
+    inferences = []
     return inferences if other.empty? || other == self # don't make inferences from empty or equivalent facts
 
     superset_inferences(other, inferences)
     intersection_forced_inferences(other, inferences)
-    inferences
+    inferences.uniq
   end
 
   def certain?
@@ -31,12 +36,14 @@ class Fact
   end
 
   def safety
-    @mines_contained.to_f / @cells.size
+    1 - (@mines_contained.to_f / @cells.size)
   end
 
   def ==(other)
     @cells == other.cells && @mines_contained == other.mines_contained
   end
+
+  alias eql? ==
 
   # remove a cell from the set
   def reveal_cell(cell)
@@ -57,9 +64,15 @@ class Fact
   end
 
   def empty?
-    raise "Fact is empty but has #{@mines_contained} mines" unless @mines_contained == 0 || !@cells.empty?
+    raise "Fact is empty but has #{@mines_contained} mines" unless @mines_contained.zero? || !@cells.empty?
 
     @cells.empty?
+  end
+
+  def to_s
+    str = +'['
+    @cells.each { |cell| str += "#{cell}, "}
+    str += "Num mines: #{@mines_contained}]"
   end
 
   private
@@ -76,19 +89,23 @@ class Fact
 
   # self is a strict superset
   def superset_inferences(other, inferences)
-    inferences.safe_add(Fact.new(@cells ^ other.cells, @mines_contained - other.mines_contained)) if self > other
+    inferences.append(Fact.new(@cells ^ other.cells, @mines_contained - other.mines_contained)) if @cells > other.cells
   end
 
   # other forces all cells in self not in other to be mines
   def intersection_forced_inferences(other, inferences)
-    return unless intersect_but_not_superset?(other)
+    return unless intersect_but_no_superset(other) && size_diff_matches_mine_diff(other)
 
-    inferences.safe_add(Fact.new(@cells - other.cells, @mines_contained - other.mines_contained))
-    inferences.safe_add(Fact.new(other.cells - @cells, 0))
-    inferences.safe_add(Fact.new(other.cells & @cells, other.mines_contained))
+    inferences.append(Fact.new(@cells - other.cells, @mines_contained - other.mines_contained))
+    inferences.append(Fact.new(other.cells - @cells, 0))
+    inferences.append(Fact.new(other.cells & @cells, other.mines_contained))
   end
 
-  def intersect_but_not_superset?(other)
-    @cells.intersect?(other.cells) && @mines_contained - other.mines_contained == (@cells - other.cells).size
+  def intersect_but_no_superset(other)
+    @cells.intersect?(other.cells) && !(other.cells > @cells) && !(@cells > other.cells)
+  end
+
+  def size_diff_matches_mine_diff(other)
+    @mines_contained - other.mines_contained == (@cells - other.cells).size
   end
 end

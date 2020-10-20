@@ -16,6 +16,7 @@ class Player
 
     setup(minefield)
     reveal @minefield.cell_at(@minefield.first_click)
+    puts @minefield
     make_move(choose_move) until @minefield.clear?
     puts 'Victory!'
     clean_up
@@ -84,6 +85,7 @@ class Player
   end
 
   def make_move(move)
+    puts move.flag?
     move.flag? ? flag(move.cell) : reveal(move.cell)
   end
 end

@@ -53,7 +53,7 @@ class Cell
 
   # flag the cell, returns true if the cell was not already flagged
   def flag
-    @flagged != @flagged = true
+    @flagged != @flagged = true unless @revealed
   end
 
   # unflag the cell, returns true if the cell was not already unflagged
@@ -82,6 +82,12 @@ class Cell
   end
 
   def hidden_and_unflagged_neighbors
-    @neighbors.select { |n| !n.revealed? && !n.flagged?}
+    puts 'neighbors'
+    puts(@neighbors.select { |n| !n.revealed? && !n.flagged? })
+    Set.new(@neighbors.select { |n| !n.revealed? && !n.flagged? })
+  end
+
+  def flagged_neighbors
+    Set.new(@neighbors.select(&:flagged?))
   end
 end

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'set'
 require './cell'
 
 # basic minefield, no neighbor topology
@@ -48,7 +49,6 @@ class Minefield
     # don't update revealed data if the cell was not successfully revealed
     # ie, if the cell was flagged or had already been revealed
     puts neighbor_mine_count
-    puts neighbor_mine_count == false
     return if neighbor_mine_count == false
 
     @num_to_clear -= 1
@@ -85,7 +85,11 @@ class Minefield
   end
 
   def all_cells
-    @minefield.dup
+    puts 'grabbing all cells'
+    all = Set.new
+    @minefield.each { |cell| all.add(cell); puts 'adding cell' }
+    puts 'done'
+    all
   end
 
   private
@@ -100,9 +104,12 @@ class Minefield
   def populate_trapped_cells
     mines_laid = 0
     until mines_laid == @num_mines
-      puts 'laying mines'
+      puts 'laying mine'
       pos = position_class.new(rand(@num_cells))
-      mines_laid += 1 if pos != @first_click && !cell_at(pos).neighbors?(@first_click) && cell_at(pos).set_mine
+      puts pos
+      puts pos.true_position
+      puts cell_at(pos).nil?
+      mines_laid += 1 if pos != @first_click && !cell_at(pos).neighbors?(cell_at(@first_click)) && cell_at(pos).set_mine
     end
   end
 
@@ -156,7 +163,8 @@ class Minefield
   def cascade_reveal(cell)
     puts 'cascade revealing'
     cell.neighbors.each do |n|
-      reveal(n) unless n.revealed
+      puts "revealing #{n}" unless n.revealed?
+      reveal(n) unless n.revealed?
     end
   end
 end

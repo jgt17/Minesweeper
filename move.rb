@@ -7,6 +7,6 @@ class Move
   end
 
   def flag?
-    flag
+    @flag
   end
 end

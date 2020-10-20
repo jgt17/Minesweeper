@@ -5,7 +5,7 @@ require './random_player'
 require './nerd_player'
 require 'set'
 
-minefield = RectangularMinefield.new(10, 10, 3)
+minefield = RectangularMinefield.new(30, 16, 99)
 puts minefield
 sheldon = NerdPlayer.new
 sheldon.play(minefield)
