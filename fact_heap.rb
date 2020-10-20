@@ -41,7 +41,8 @@ class FactHeap
     @heap.pop
     return fact if cell_index == @heap.length
 
-    if cell_index.positive? && @heap[parent(cell_index)].compare_with(@heap[cell_index]).positive?
+    puts "caused by delete #{cell_index} #{@heap[cell_index]} #{parent(cell_index) ? @heap[parent(cell_index)] : 'nil'}"
+    if cell_index.positive? && @heap[parent(cell_index)].compare_with(@heap[cell_index]).negative?
       sift_up(cell_index)
     else
       sift_down(cell_index)
@@ -84,6 +85,7 @@ class FactHeap
   end
 
   def sift_up(index)
+    puts "#{@heap[index]} sifting up"
     index += @heap.length if index.negative?
     parent = parent(index)
     return index if parent.nil?
@@ -95,6 +97,7 @@ class FactHeap
   end
 
   def sift_down(index)
+    puts "#{@heap[index]} sifting down"
     index += @heap.length if index.negative?
     left = left_child(index)
     return index if left.nil?

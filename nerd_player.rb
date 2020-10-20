@@ -44,7 +44,7 @@ class NerdPlayer < Player
     @facts = FactHeap.new
     # initialize the FactHeap with the entire board
     # needed for some edge cases
-    @facts.push(Fact.new(@minefield.all_cells, @minefield.num_mines))
+    # @facts.push(Fact.new(@minefield.all_cells, @minefield.num_mines))
     @move_queue = []
   end
 
