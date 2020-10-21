@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './position'
+require_relative './position'
 
 # dynamically created class to represent a single position
 def custom_rectangular_position(width, height)

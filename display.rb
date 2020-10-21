@@ -12,8 +12,7 @@ module Displays
   def self.blank_display(obj); end
 
   # display mode
-  DISPLAY = method :text_display
-  puts DISPLAY
+  DISPLAY = method :blank_display
 end
 
 # visual display at some point?

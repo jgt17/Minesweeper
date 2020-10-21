@@ -8,6 +8,7 @@ require './display'
 # allows expanding to rectangular and other configurations (hex, triangles)
 # without player's needing to know precise details
 class Minefield
+  include Displays
   attr_reader :first_click
   attr_reader :num_mines
   attr_reader :num_flagged
@@ -154,7 +155,7 @@ class Minefield
   def trip_mine
     DISPLAY.call 'Revealed a Mine!'
     DISPLAY.call self
-    exit 5
+    raise 'Revealed a Mine!'
   end
 
   # continue revealing cells as long as they have no neighboring mines

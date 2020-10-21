@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require './utilities'
-require './rectangular_position'
-require './minefield'
+require_relative '../positions/rectangular_position'
+require_relative './minefield'
 
 # The traditional minefield
 class RectangularMinefield < Minefield

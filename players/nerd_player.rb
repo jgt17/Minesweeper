@@ -93,6 +93,5 @@ class NerdPlayer < Player
     DISPLAY.call 'Injecting Global Fact'
     @facts.push(Fact.new(@minefield.hidden_and_unflagged_cells, @minefield.num_mines - @minefield.num_flagged))
     @global_fact_added = true
-    puts @facts
   end
 end

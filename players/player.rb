@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-require './minefield'
-require './cell'
-require './display'
+require_relative '../minefields/minefield'
+require_relative '../cell'
+require_relative '../display'
 
 # abstract player
 class Player
+  include Displays
   def initialize
     @dummy_minefield = Minefield.new(1, 0)
     @minefield = @dummy_minefield
@@ -18,10 +19,17 @@ class Player
     setup(minefield)
     DISPLAY.call @minefield
     reveal @minefield.cell_at(@minefield.first_click)
-    make_move(choose_move) until @minefield.clear?
-    DISPLAY.call 'Victory!'
+    lost = false
+    begin
+      make_move(choose_move) until @minefield.clear?
+      DISPLAY.call 'Victory!'
+    rescue RuntimeError => e
+      DISPLAY.call 'Boom!'
+      lost = true
+    end
     DISPLAY.call @minefield
     clean_up
+    !lost
   end
 
   # implementations of Player should overwrite the methods below as appropriate

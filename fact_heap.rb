@@ -5,6 +5,7 @@ require './display'
 # implements a binary heap of Facts on an Array
 # certainty is considered first, then safety
 class FactHeap
+  include Displays
   def initialize
     @heap = []
   end

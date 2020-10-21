@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require './player'
+require_relative './player'
 require 'set'
-require './display'
+require_relative '../display'
 
 # a player that guesses randomly and un-intelligently
 class RandomPlayer < Player
