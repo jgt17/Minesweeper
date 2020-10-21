@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+# rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/ClassLength
 
 require 'minitest/autorun'
 require './cell'
@@ -118,4 +118,4 @@ class CellTest < Minitest::Test
     assert cell1.flagged_neighbors == Set.new([cell3])
   end
 end
-# rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+# rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/ClassLength

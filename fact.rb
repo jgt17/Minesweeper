@@ -10,6 +10,8 @@ class Fact
 
   def initialize(cells = Set.new, mines_contained = 0)
     raise 'Expected a set' unless cells.is_a?(Set)
+    raise 'More mines than cells' unless cells.size >= mines_contained
+    raise 'Should be a set of cells' unless cells.all? { |n| n.is_a? Cell }
 
     @cells = cells
     @mines_contained = mines_contained
@@ -93,13 +95,13 @@ class Fact
   def intersection_forced_inferences(other, inferences)
     return unless intersect_but_no_superset(other) && size_diff_matches_mine_diff(other)
 
-    inferences.append(Fact.new(@cells - other.cells, @mines_contained - other.mines_contained))
-    inferences.append(Fact.new(other.cells - @cells, 0))
-    inferences.append(Fact.new(other.cells & @cells, other.mines_contained))
+    inferences.append(Fact.new(@cells - other.cells, @mines_contained - other.mines_contained),
+                      Fact.new(other.cells - @cells, 0),
+                      Fact.new(other.cells & @cells, other.mines_contained))
   end
 
   def intersect_but_no_superset(other)
-    !@cells.intersect?(other.cells) && !(other.cells > @cells || @cells > other.cells)
+    @cells.intersect?(other.cells) && !(other.cells > @cells || @cells > other.cells)
   end
 
   def size_diff_matches_mine_diff(other)
