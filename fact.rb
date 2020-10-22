@@ -27,7 +27,7 @@ class Fact
 
     superset_inferences(other, inferences)
     intersection_forced_inferences(other, inferences)
-    inferences.uniq
+    inferences
   end
 
   def certain?
@@ -72,6 +72,10 @@ class Fact
     str = +'['
     @cells.each { |cell| str += "#{cell}, "}
     str += "Num mines: #{@mines_contained}]"
+  end
+
+  def random_cell
+    @cells.to_a.sample
   end
 
   private

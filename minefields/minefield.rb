@@ -27,9 +27,13 @@ class Minefield
     generate
   end
 
-  # get a random cell in the minefield
+  # get a random position in the minefield
   def random_position
     position_class.new(rand(@num_cells))
+  end
+
+  def random_cell
+    cell_at(random_position)
   end
 
   def to_s

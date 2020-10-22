@@ -7,6 +7,8 @@ require './move'
 require './display'
 
 # a player that uses facts to make inferences and play intelligently
+# runtime complexity unsatisfactorily high, v2 using hashes instead
+# of a heat in geek_player.rb
 class NerdPlayer < Player
   def initialize
     super
@@ -53,6 +55,8 @@ class NerdPlayer < Player
     @facts = FactHeap.new
     # initialize the FactHeap with the entire board
     # needed for some edge cases
+    # Update: adding unnecessarily leads to fact size explosion,
+    # adding later and only when necessary helps with this
     # @facts.push(Fact.new(@minefield.all_cells, @minefield.num_mines))
     @move_queue = []
     @global_fact_added = false

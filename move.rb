@@ -16,4 +16,10 @@ class Move
   def to_s
     @flag ? "Flag #{cell}" : "Reveal #{cell}"
   end
+
+  def ==(other)
+    other.is_a?(Move) && other.cell == self.cell && other.flag? == self.flag?
+  end
+
+  alias eql? ==
 end
