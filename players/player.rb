@@ -24,8 +24,11 @@ class Player
       make_move(choose_move) until @minefield.clear?
       DISPLAY.call 'Victory!'
     rescue RuntimeError => e
-      DISPLAY.call 'Boom!'
-      lost = true
+      if e.full_message == 'Revealed a mine!'
+        DISPLAY.call 'Boom!'
+        lost = true
+      end
+      raise e
     end
     DISPLAY.call @minefield
     clean_up

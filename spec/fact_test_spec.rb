@@ -70,6 +70,21 @@ class FactTest < Minitest::Test
     refute fact1 == fact4
   end
 
+  def test_set_uniqueness
+    cell1 = Cell.new
+    cell2 = Cell.new
+    fact1 = Fact.new(Set.new([cell1, cell2]), 1)
+    fact2 = Fact.new(Set.new([cell2, cell1]), 1)
+    fact3 = Fact.new(Set.new([cell1, cell2, Cell.new]), 1)
+    fact4 = Fact.new(Set.new([cell2]), 1)
+    set = Set.new
+    assert set.add?(fact1)
+    refute set.add?(fact2)
+    assert set.add?(fact3)
+    fact1.reveal_cell(cell1)
+    refute set.add?(fact4)
+  end
+
   def test_reveal_cell
     cell1 = Cell.new
     cell2 = Cell.new

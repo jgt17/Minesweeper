@@ -9,10 +9,9 @@ require 'set'
 
 # main class
 class Main
-  def self.play(width = 9, height = 9, num_mines = 10, player = GeekPlayer.new)
+  def self.play(minefield = RectangularMinefield.new, player = GeekPlayer.new)
     include Displays
 
-    minefield = RectangularMinefield.new(width, height, num_mines)
     DISPLAY.call minefield
     player.play(minefield)
   end
@@ -28,4 +27,6 @@ class Main
   end
 end
 
-Main.benchmark(30, 16, 99, 100)
+# Todo generalize benchmark to different minefield types (implement generating minefield from other)
+#Main.benchmark(30, 16, 99, 100)
+Main.play

@@ -18,7 +18,7 @@ class Move
   end
 
   def ==(other)
-    other.is_a?(Move) && other.cell == self.cell && other.flag? == self.flag?
+    other.is_a?(Move) && other.cell == @cell && other.flag? == @flag
   end
 
   alias eql? ==

@@ -44,6 +44,12 @@ class Fact
 
   alias eql? ==
 
+  def hash
+    k = 1
+    @cells.each { |cell| k *= cell.hash }
+    k += @mines_contained
+  end
+
   # remove a cell from the set
   def reveal_cell(cell)
     remove_cell(cell)
@@ -76,6 +82,14 @@ class Fact
 
   def random_cell
     @cells.to_a.sample
+  end
+
+  def size
+    @cells.size
+  end
+
+  def include?(o)
+    @cells.include?(o)
   end
 
   private

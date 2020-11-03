@@ -22,7 +22,7 @@ class GeekPlayer < Player
 
   def notify_revealed(cell)
     remove_cell_from_facts(cell)
-    @move_queue.delete(cell)
+    @move_queue.delete(Move.new(cell, false))
     add_fact_from_cell(cell)
   end
 
@@ -36,9 +36,8 @@ class GeekPlayer < Player
     DISPLAY.call @move_queue.empty? ? '[]' : @move_queue
     return make_move_from_queue unless @move_queue.empty?
 
+    puts 'pruning'
     prune # make as many moves as possible between prunes
-    attempt_inject_global_fact if @uncertain_facts.empty? && @certain_facts.empty?
-    return make_move_from_queue unless @move_queue.empty?
 
     until !@certain_facts.empty? || !infer; end
     DISPLAY.call 'Made some inferences'
@@ -50,6 +49,11 @@ class GeekPlayer < Player
     unless !@certain_facts.empty? || @global_fact_added
       attempt_inject_global_fact
       return choose_move
+    end
+    # remove large facts after making inferences from the global fact to prevent uncertain_facts size from exploding
+    if @global_fact_added
+      @global_fact_added = false
+      prune
     end
     @certain_facts.empty? ? add_safest_guess_to_queue : load_certain_moves_to_queue
     DISPLAY.call 'Move Queue'
@@ -78,14 +82,22 @@ class GeekPlayer < Player
 
   def remove_cell_from_facts(cell, flagged = false)
     flag_or_reveal = flagged ? Fact.instance_method(:flag_cell) : Fact.instance_method(:reveal_cell)
-    @certain_facts.each { |fact| flag_or_reveal.bind(fact).call(cell) }
-    @uncertain_facts.each do |fact|
+    updated_facts = Set.new
+    @certain_facts.each do |fact|
+      next unless fact.include?(cell)
+
+      @certain_facts.delete(fact)
       flag_or_reveal.bind(fact).call(cell)
-      if fact.certain?
-        @uncertain_facts.delete(fact)
-        add_fact(fact)
-      end
+      updated_facts.add(fact)
     end
+    @uncertain_facts.each do |fact|
+      next unless fact.include?(cell)
+
+      @uncertain_facts.delete(fact)
+      flag_or_reveal.bind(fact).call(cell)
+      updated_facts.add(fact)
+    end
+    updated_facts.each { |fact| add_fact(fact) }
   end
 
   def add_fact_from_cell(cell)
@@ -99,6 +111,9 @@ class GeekPlayer < Player
   # iterate over the known uncertain facts and attempt to derive new ones
   # returns true if at least one fact was able to be inferred, else false
   def infer
+    return false if @uncertain_facts.empty?
+
+    puts 'inferring'
     new_facts = Set.new
     @uncertain_facts.each { |n| @uncertain_facts.each { |m| new_facts |= n.infer(m).reject(&:empty?) } }
     # inferences are not commutative
@@ -110,11 +125,18 @@ class GeekPlayer < Player
   def prune
     @uncertain_facts.delete_if(&:empty?)
     @certain_facts.delete_if(&:empty?)
+
+    prune_large_facts unless @global_fact_added
+    # remove large facts after making inferences from the global fact to prevent uncertain_facts size from exploding
+  end
+
+  def prune_large_facts
+    @uncertain_facts.delete_if { |fact| fact.size > 8 }
   end
 
   def add_safest_guess_to_queue
     safest_fact = nil
-    @uncertain_facts.each { |fact| safest_fact = fact if safest_fact.nil? || safest_fact.safety > fact.safety }
+    @uncertain_facts.each { |fact| safest_fact = fact if safest_fact.nil? || safest_fact.safety < fact.safety }
     raise 'No moves' if safest_fact.nil?
 
     @move_queue.push(Move.new(safest_fact.random_cell, false))
@@ -128,18 +150,19 @@ class GeekPlayer < Player
 
   def add_fact(fact)
     raise 'Expected a fact' unless fact.is_a? Fact
-    raise 'Added empty fact' if fact.empty?
+    return false if fact.empty?
 
     fact.certain? ? @certain_facts.add?(fact) : @uncertain_facts.add?(fact)
   end
 
   def attempt_inject_global_fact
+    puts 'attempting global fact'
     return if @global_fact_added
 
     DISPLAY.call 'Injecting Global Fact'
     global_fact = Fact.new(@minefield.hidden_and_unflagged_cells, @minefield.num_mines - @minefield.num_flagged)
     # prevent global fact from being added too early
-    if global_fact.cells.size < 10
+    if global_fact.cells.size < 1000
       add_fact(global_fact)
       @global_fact_added = true
     else
