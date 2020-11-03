@@ -3,6 +3,7 @@
 require 'set'
 require './cell'
 require './display'
+require './tripped_mine_error'
 
 # basic minefield, no neighbor topology
 # allows expanding to rectangular and other configurations (hex, triangles)
@@ -159,7 +160,7 @@ class Minefield
   def trip_mine
     DISPLAY.call 'Revealed a Mine!'
     DISPLAY.call self
-    raise 'Revealed a Mine!'
+    raise TrippedMineError
   end
 
   # continue revealing cells as long as they have no neighboring mines

@@ -3,6 +3,7 @@
 require_relative '../minefields/minefield'
 require_relative '../cell'
 require_relative '../display'
+require_relative '../tripped_mine_error'
 
 # abstract player
 class Player
@@ -23,12 +24,9 @@ class Player
     begin
       make_move(choose_move) until @minefield.clear?
       DISPLAY.call 'Victory!'
-    rescue RuntimeError => e
-      if e.full_message == 'Revealed a mine!'
-        DISPLAY.call 'Boom!'
-        lost = true
-      end
-      raise e
+    rescue TrippedMineError
+      DISPLAY.call 'Boom!'
+      lost = true
     end
     DISPLAY.call @minefield
     clean_up

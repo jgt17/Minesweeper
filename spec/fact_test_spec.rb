@@ -81,7 +81,9 @@ class FactTest < Minitest::Test
     assert set.add?(fact1)
     refute set.add?(fact2)
     assert set.add?(fact3)
-    fact1.reveal_cell(cell1)
+    set.delete(fact1)
+    fact1.reveal_cell!(cell1)
+    set.add?(fact1)
     refute set.add?(fact4)
   end
 
@@ -90,9 +92,9 @@ class FactTest < Minitest::Test
     cell2 = Cell.new
     set = Set.new([cell1, cell2])
     fact = Fact.new(set, 0)
-    fact.reveal_cell(cell1)
+    fact.reveal_cell!(cell1)
     refute set.include? cell1
-    fact.reveal_cell(Cell.new)
+    fact.reveal_cell!(Cell.new)
     assert set == Set.new([cell2])
   end
 
@@ -101,10 +103,10 @@ class FactTest < Minitest::Test
     cell2 = Cell.new
     set = Set.new([cell1, cell2])
     fact = Fact.new(set, 2)
-    fact.flag_cell(cell1)
+    fact.flag_cell!(cell1)
     refute set.include? cell1
     assert fact.mines_contained == 1
-    fact.reveal_cell(Cell.new)
+    fact.reveal_cell!(Cell.new)
     assert set == Set.new([cell2])
     assert fact.mines_contained == 1
   end

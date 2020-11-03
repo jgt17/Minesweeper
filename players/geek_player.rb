@@ -36,7 +36,7 @@ class GeekPlayer < Player
     DISPLAY.call @move_queue.empty? ? '[]' : @move_queue
     return make_move_from_queue unless @move_queue.empty?
 
-    puts 'pruning'
+    DISPLAY.call 'pruning'
     prune # make as many moves as possible between prunes
 
     until !@certain_facts.empty? || !infer; end
@@ -81,7 +81,7 @@ class GeekPlayer < Player
   end
 
   def remove_cell_from_facts(cell, flagged = false)
-    flag_or_reveal = flagged ? Fact.instance_method(:flag_cell) : Fact.instance_method(:reveal_cell)
+    flag_or_reveal = flagged ? Fact.instance_method(:flag_cell!) : Fact.instance_method(:reveal_cell!)
     updated_facts = Set.new
     @certain_facts.each do |fact|
       next unless fact.include?(cell)
@@ -111,14 +111,15 @@ class GeekPlayer < Player
   # iterate over the known uncertain facts and attempt to derive new ones
   # returns true if at least one fact was able to be inferred, else false
   def infer
-    return false if @uncertain_facts.empty?
+    return false if @uncertain_facts.empty? || @uncertain_facts.size > 60 # sacrifice a bit of accuracy for runtime
 
-    puts 'inferring'
+    DISPLAY.call 'inferring'
+    DISPLAY.call @uncertain_facts.size
     new_facts = Set.new
     @uncertain_facts.each { |n| @uncertain_facts.each { |m| new_facts |= n.infer(m).reject(&:empty?) } }
     # inferences are not commutative
     fact_added = false
-    new_facts.each { |fact| fact_added = !add_fact(fact) || fact_added }
+    new_facts.each { |fact| fact_added = add_fact(fact) || fact_added }
     fact_added
   end
 
@@ -135,10 +136,8 @@ class GeekPlayer < Player
   end
 
   def add_safest_guess_to_queue
-    safest_fact = nil
-    @uncertain_facts.each { |fact| safest_fact = fact if safest_fact.nil? || safest_fact.safety < fact.safety }
-    raise 'No moves' if safest_fact.nil?
-
+    safest_fact = get_global_fact
+    @uncertain_facts.each { |fact| safest_fact = fact if safest_fact.safety < fact.safety }
     @move_queue.push(Move.new(safest_fact.random_cell, false))
   end
 
@@ -156,18 +155,22 @@ class GeekPlayer < Player
   end
 
   def attempt_inject_global_fact
-    puts 'attempting global fact'
+    DISPLAY.call 'attempting global fact'
     return if @global_fact_added
 
     DISPLAY.call 'Injecting Global Fact'
-    global_fact = Fact.new(@minefield.hidden_and_unflagged_cells, @minefield.num_mines - @minefield.num_flagged)
+    global_fact = get_global_fact
     # prevent global fact from being added too early
-    if global_fact.cells.size < 1000
+    if global_fact.cells.size < 16
       add_fact(global_fact)
       @global_fact_added = true
     else
       DISPLAY.call 'Failed, Global Fact still too large'
       add_safest_guess_to_queue
     end
+  end
+
+  def get_global_fact
+    Fact.new(@minefield.hidden_and_unflagged_cells, @minefield.num_mines - @minefield.num_flagged)
   end
 end

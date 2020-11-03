@@ -47,16 +47,16 @@ class Fact
   def hash
     k = 1
     @cells.each { |cell| k *= cell.hash }
-    k += @mines_contained
+    k += @mines_contained.hash
   end
 
   # remove a cell from the set
-  def reveal_cell(cell)
+  def reveal_cell!(cell)
     remove_cell(cell)
   end
 
   # flag a cell, removing it from the Fact and decrementing mines_contained if the cell was in the Fact
-  def flag_cell(cell)
+  def flag_cell!(cell)
     decr_mines unless remove_cell(cell).nil?
   end
 
@@ -88,8 +88,8 @@ class Fact
     @cells.size
   end
 
-  def include?(o)
-    @cells.include?(o)
+  def include?(obj)
+    @cells.include?(obj)
   end
 
   private
