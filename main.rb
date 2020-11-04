@@ -31,5 +31,5 @@ end
 Main.benchmark(9, 9, 10, 100)
 # Main.play
 
-# todo refactor code and make it pretty
-# todo support non-random first guesses
+# TODO: refactor code and make it pretty
+# TODO: support non-random first guesses

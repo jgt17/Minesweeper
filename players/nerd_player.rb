@@ -7,8 +7,10 @@ require './move'
 require './display'
 
 # a player that uses facts to make inferences and play intelligently
-# runtime complexity unsatisfactorily high, v2 using hashes instead
-# of a heat in geek_player.rb
+#########################################################################
+### runtime complexity unsatisfactorily high, v2 using hashes instead ###
+### of a heap in geek_player.rb                                       ###
+#########################################################################
 class NerdPlayer < Player
   def initialize
     super

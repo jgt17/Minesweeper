@@ -95,12 +95,12 @@ class Minefield
 
   def all_cells
     all = Set.new
-    @minefield.each { |cell| all.add(cell)}
+    @minefield.each { |cell| all.add(cell) }
     all
   end
 
   def hidden_and_unflagged_cells
-    Set.new(@minefield.reject { |cell| cell.revealed? || cell.flagged? } )
+    Set.new(@minefield.reject { |cell| cell.revealed? || cell.flagged? })
   end
 
   private

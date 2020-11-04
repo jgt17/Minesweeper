@@ -20,17 +20,10 @@ class Player
     setup(minefield)
     DISPLAY.call @minefield
     reveal @minefield.cell_at(@minefield.first_click)
-    lost = false
-    begin
-      make_move(choose_move) until @minefield.clear?
-      DISPLAY.call 'Victory!'
-    rescue TrippedMineError
-      DISPLAY.call 'Boom!'
-      lost = true
-    end
+    won = play_out
     DISPLAY.call @minefield
     clean_up
-    !lost
+    won
   end
 
   # implementations of Player should overwrite the methods below as appropriate
@@ -43,7 +36,19 @@ class Player
   # to be implemented by children
   def choose_first_click; end
 
-  protected
+  private
+
+  # keep making moves until the game is won or lost, return true if won, else false
+  def play_out
+    begin
+      make_move(choose_move) until @minefield.clear?
+      DISPLAY.call 'Victory!'
+    rescue TrippedMineError
+      DISPLAY.call 'Boom!'
+      return false
+    end
+    true
+  end
 
   # choose the next cell to reveal or flag/unflag
   def choose_move

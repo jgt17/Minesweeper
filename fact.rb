@@ -47,6 +47,7 @@ class Fact
   def hash
     k = 1
     @cells.each { |cell| k *= cell.hash }
+    # noinspection RubyUnusedLocalVariable
     k += @mines_contained.hash
   end
 
@@ -76,7 +77,8 @@ class Fact
 
   def to_s
     str = +'['
-    @cells.each { |cell| str += "#{cell}, "}
+    @cells.each { |cell| str += "#{cell}, " }
+    # noinspection RubyUnusedLocalVariable
     str += "Num mines: #{@mines_contained}]"
   end
 

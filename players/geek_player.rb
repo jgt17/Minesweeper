@@ -8,9 +8,10 @@ require 'set'
 
 # a player that uses facts to make inferences and play intelligently
 # uses the same underlying logic as NerdPlayer, but storing facts in
-# a hash instead of a heap should improve runtimes dramatically
+# a hash instead of a heap improves runtimes dramatically
 # I realized I don't need as much ordering on the Facts as I thought
 # I did, and maintaining that ordering takes a lot of runtime
+# todo refactor maintaining the fact sets and logic to a separate class
 class GeekPlayer < Player
   def initialize
     super
@@ -118,11 +119,17 @@ class GeekPlayer < Player
     new_facts = Set.new
     @uncertain_facts.each { |n| @uncertain_facts.each { |m| new_facts |= n.infer(m).reject(&:empty?) } }
     # inferences are not commutative
+    add_new_facts(new_facts)
+  end
+
+  # attempts to add a set of facts to the fact heap, returns true if at least one was successfully added, else false
+  def add_new_facts(new_facts)
     fact_added = false
     new_facts.each { |fact| fact_added = add_fact(fact) || fact_added }
     fact_added
   end
 
+  # remove empty or excessively large facts from the fact heap
   def prune
     @uncertain_facts.delete_if(&:empty?)
     @certain_facts.delete_if(&:empty?)
@@ -135,18 +142,22 @@ class GeekPlayer < Player
     @uncertain_facts.delete_if { |fact| fact.size > 8 }
   end
 
+  # choose one of the safest guesses from the available knowledge and add it to the move queue
+  # todo non-naive guessing
   def add_safest_guess_to_queue
-    safest_fact = get_global_fact
+    safest_fact = create_global_fact
     @uncertain_facts.each { |fact| safest_fact = fact if safest_fact.safety < fact.safety }
     @move_queue.push(Move.new(safest_fact.random_cell, false))
   end
 
+  # add all the moves represented by the set of certain facts to the move queue
   def load_certain_moves_to_queue
     moves = Set.new
     @certain_facts.each { |fact| fact.cells.each { |cell| moves.add(Move.new(cell, fact.safety.zero?)) } }
     @move_queue.concat moves.to_a
   end
 
+  # add a fact to the heap
   def add_fact(fact)
     raise 'Expected a fact' unless fact.is_a? Fact
     return false if fact.empty?
@@ -154,12 +165,12 @@ class GeekPlayer < Player
     fact.certain? ? @certain_facts.add?(fact) : @uncertain_facts.add?(fact)
   end
 
+  # attempt to add the global board state to the known facts, possibly opening up new inferences
   def attempt_inject_global_fact
-    DISPLAY.call 'attempting global fact'
     return if @global_fact_added
 
     DISPLAY.call 'Injecting Global Fact'
-    global_fact = get_global_fact
+    global_fact = create_global_fact
     # prevent global fact from being added too early
     if global_fact.cells.size < 16
       add_fact(global_fact)
@@ -170,7 +181,8 @@ class GeekPlayer < Player
     end
   end
 
-  def get_global_fact
+  # get the global fact at any given point in the game
+  def create_global_fact
     Fact.new(@minefield.hidden_and_unflagged_cells, @minefield.num_mines - @minefield.num_flagged)
   end
 end

@@ -2,7 +2,6 @@
 
 # different display modes for the minefield and AI processes
 module Displays
-
   # default display, print to console
   def self.text_display(obj)
     puts obj
@@ -10,6 +9,8 @@ module Displays
 
   # blank display, print nothing. mostly for performance testing
   def self.blank_display(obj); end
+
+  # todo graphical display?
 
   # display mode
   DISPLAY = method :blank_display
