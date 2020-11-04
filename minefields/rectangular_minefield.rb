@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-require './utilities'
+require_relative './minefield_validation_utilities'
 require_relative '../positions/rectangular_position'
 require_relative './minefield'
 
 # The traditional minefield
 class RectangularMinefield < Minefield
-  include Utilities
   attr_reader :width
   attr_reader :height
   MAX_MINE_DENSITY = 0.75
@@ -17,7 +16,6 @@ class RectangularMinefield < Minefield
     @height = height
     @position_class = custom_rectangular_position(@width, @height) # create position class for this minefield
     super(width * height, num_mines, first_click)
-    check_params
   end
 
   def to_s
@@ -40,12 +38,11 @@ class RectangularMinefield < Minefield
 
   private
 
-  # check that the params of the minefield are within accepted values
-  def check_params
+  # verifies that the params of the minefield are within accepted values
+  def type_specific_checks
     check_integer_param @width, :width
     check_integer_param @height, :height
     check_integer_param @num_mines, :num_mines
-    validate_params
     true
   end
 
@@ -53,20 +50,28 @@ class RectangularMinefield < Minefield
   def assign_neighbors
     (0...@width).each do |x|
       (0...@height).each do |y|
-        gather_neighbors(x, y)
+        gather_and_assign_neighbors(x, y)
       end
     end
   end
 
-  # returns an array of cells that neighbor the cell at (x, y)
-  def gather_neighbors(x_pos, y_pos)
+  # sets cells that are adjacent to the cell at (x, y) in the minefield as neighbors of the cell at (x, y)
+  def gather_and_assign_neighbors(x_pos, y_pos)
     cell = cell_at(@position_class.new(x_pos, y_pos))
-    x_neighbors, y_neighbors = neighboring_ranges(x_pos, @width, y_pos, @height)
+    x_neighbors, y_neighbors = neighboring_ranges(x_pos, y_pos)
     x_neighbors.each do |i|
       y_neighbors.each do |j|
         pos = @position_class.new(i, j)
         cell.add_neighbor(cell_at(pos)) unless pos.nil? || (i == x_pos && j == y_pos)
       end
     end
+  end
+
+  def neighboring_range(val, max)
+    ((val - 1 >= 0 ? val - 1 : 0)..(val + 1 < max ? val + 1 : max - 1))
+  end
+
+  def neighboring_ranges(x_pos, y_pos)
+    [neighboring_range(x_pos, @width), neighboring_range(y_pos, @height)]
   end
 end

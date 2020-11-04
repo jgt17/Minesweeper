@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative './position'
+require_relative '../validation_utilities'
 
 # dynamically created class to represent a single position
 def custom_rectangular_position(width, height)
@@ -13,7 +14,6 @@ end
 # base position class for a rectangular minefield
 # extended dynamically with the dimensions of the minefield
 class RectangularPosition < Position
-  include Utilities
   attr_reader :x_pos
   attr_reader :y_pos
   class << self

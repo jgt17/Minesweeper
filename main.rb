@@ -28,7 +28,8 @@ class Main
 end
 
 # Todo generalize benchmark to different minefield types (implement generating minefield from other)
-Main.benchmark(30, 16, 99, 10000)
+Main.benchmark(9, 9, 10, 100)
 # Main.play
 
 # todo refactor code and make it pretty
+# todo support non-random first guesses
