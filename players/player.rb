@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative '../minefields/minefield'
-require_relative '../cell'
+require_relative '../game_resources/minefields/minefield'
+require_relative '../game_resources/cell'
 require_relative '../display'
-require_relative '../tripped_mine_error'
+require_relative '../game_resources/tripped_mine_error'
 
 # abstract player
 class Player
@@ -31,6 +31,12 @@ class Player
 
   # triggered when the minefield successfully reveals a cell, either from a chosen move or cascading reveal
   def notify_revealed(cell); end
+
+  # triggered when the minefield successfully flags a cell
+  def notify_flagged(cell); end
+
+  # triggered when the minefield successfully removes a flag from a cell
+  def notify_unflagged(_cell); end
 
   # get the player's first click choice, otherwise random
   # to be implemented by children

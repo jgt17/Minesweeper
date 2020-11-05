@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require './fact'
-require './fact_heap'
-require './cell'
-require './move'
-require './display'
+require_relative './fact_management/fact'
+require_relative './fact_management/fact_heap'
+require_relative '../game_resources/cell'
+require_relative '../game_resources/move'
+require_relative '../display'
 
 # a player that uses facts to make inferences and play intelligently
 #########################################################################

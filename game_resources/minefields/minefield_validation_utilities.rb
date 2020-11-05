@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './validation_utilities'
+require_relative '../validation_utilities'
 
 # collection of methods for verifying that minefields being instantiated are valid configurations
 module MinefieldValidationUtilities

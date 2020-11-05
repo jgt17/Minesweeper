@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'set'
-require './cell'
+require_relative '../cell'
 require './display'
-require './tripped_mine_error'
+require_relative '../tripped_mine_error'
 require_relative './minefield_validation_utilities'
 
 # basic minefield, no neighbor topology
@@ -67,15 +67,19 @@ class Minefield
   # flag the indicated cell
   def flag(cell)
     return DISPLAY.call('Attempted to flag cell not in minefield') && false unless include?(cell)
+    return false unless cell.flag
 
-    @num_flagged += 1 if cell.flag
+    @num_flagged += 1
+    @player&.notify_flagged(cell)
   end
 
   # unflag the indicated cell
   def unflag(cell)
     return DISPLAY.call('Attempted to unflag cell not in minefield') && false unless include?(cell)
+    return false unless cell.unflag
 
-    @num_flagged -= 1 if cell.unflag
+    @num_flagged -= 1
+    @player&.notify_flagged(cell)
   end
 
   # check if the minefield has been successfully cleared yet
@@ -101,6 +105,13 @@ class Minefield
 
   def hidden_and_unflagged_cells
     Set.new(@minefield.reject { |cell| cell.revealed? || cell.flagged? })
+  end
+
+  def certain_moves
+    moves = Set.new
+    @certain_facts.each { |fact| fact.cells.each { |cell| moves.add(Move.new(cell, fact.safety.zero?)) } }
+    @certain_facts = Set.new
+    moves
   end
 
   private

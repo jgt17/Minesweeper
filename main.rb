@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './minefields/rectangular_minefield'
+require './game_resources/minefields/rectangular_minefield'
 require './players/random_player'
 require './players/nerd_player'
 require './players/geek_player'

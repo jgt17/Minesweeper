@@ -13,7 +13,7 @@ module Displays
   # todo graphical display?
 
   # display mode
-  DISPLAY = method :blank_display
+  DISPLAY = method :text_display
 end
 
 # visual display at some point?

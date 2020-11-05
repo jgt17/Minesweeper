@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require './fact'
-require './cell'
-require './move'
-require './display'
-require 'set'
+require_relative './fact_management/fact'
+require_relative '../game_resources/cell'
+require_relative '../game_resources/move'
+require_relative '../display'
+require_relative './fact_management/fact_hash'
 
 # a player that uses facts to make inferences and play intelligently
 # uses the same underlying logic as NerdPlayer, but storing facts in
@@ -15,8 +15,7 @@ require 'set'
 class GeekPlayer < Player
   def initialize
     super
-    @uncertain_facts = Set.new
-    @certain_facts = Set.new
+    @facts = FactHash.new
     @move_queue = []
     @global_fact_added = false
   end
@@ -25,6 +24,10 @@ class GeekPlayer < Player
     remove_cell_from_facts(cell)
     @move_queue.delete(Move.new(cell, false))
     add_fact_from_cell(cell)
+  end
+
+  def notify_flagged(cell)
+    remove_cell_from_facts(cell, true)
   end
 
   protected
@@ -40,14 +43,13 @@ class GeekPlayer < Player
     DISPLAY.call 'pruning'
     prune # make as many moves as possible between prunes
 
-    until !@certain_facts.empty? || !infer; end
+    until @facts.any_certain? || !infer; end
     DISPLAY.call 'Made some inferences'
     DISPLAY.call 'Facts'
-    DISPLAY.call 'Certain Facts'
-    DISPLAY.call @certain_facts.to_a
-    DISPLAY.call 'Uncertain Facts'
-    DISPLAY.call @uncertain_facts.to_a
-    unless !@certain_facts.empty? || @global_fact_added
+    puts 'test'
+    # DISPLAY.call @facts
+    puts 'test 2'
+    unless @facts.any_certain? || @global_fact_added
       attempt_inject_global_fact
       return choose_move
     end
@@ -56,7 +58,8 @@ class GeekPlayer < Player
       @global_fact_added = false
       prune
     end
-    @certain_facts.empty? ? add_safest_guess_to_queue : load_certain_moves_to_queue
+    puts 'test 3'
+    @facts.any_certain? ? load_certain_moves_to_queue : add_safest_guess_to_queue
     DISPLAY.call 'Move Queue'
     DISPLAY.call @move_queue.empty? ? '[]' : @move_queue
     make_move_from_queue
@@ -64,15 +67,9 @@ class GeekPlayer < Player
 
   def setup(minefield)
     super
-    @uncertain_facts = Set.new
-    @certain_facts = Set.new
+    @facts = FactHash.new
     @move_queue = []
     @global_fact_added = false
-  end
-
-  def flag(cell)
-    super
-    remove_cell_from_facts(cell, true)
   end
 
   private
@@ -82,23 +79,7 @@ class GeekPlayer < Player
   end
 
   def remove_cell_from_facts(cell, flagged = false)
-    flag_or_reveal = flagged ? Fact.instance_method(:flag_cell!) : Fact.instance_method(:reveal_cell!)
-    updated_facts = Set.new
-    @certain_facts.each do |fact|
-      next unless fact.include?(cell)
-
-      @certain_facts.delete(fact)
-      flag_or_reveal.bind(fact).call(cell)
-      updated_facts.add(fact)
-    end
-    @uncertain_facts.each do |fact|
-      next unless fact.include?(cell)
-
-      @uncertain_facts.delete(fact)
-      flag_or_reveal.bind(fact).call(cell)
-      updated_facts.add(fact)
-    end
-    updated_facts.each { |fact| add_fact(fact) }
+    @facts.remove_cell_from_facts(cell, flagged)
   end
 
   def add_fact_from_cell(cell)
@@ -112,49 +93,34 @@ class GeekPlayer < Player
   # iterate over the known uncertain facts and attempt to derive new ones
   # returns true if at least one fact was able to be inferred, else false
   def infer
-    return false if @uncertain_facts.empty? || @uncertain_facts.size > 60 # sacrifice a bit of accuracy for runtime
+    return false if !@facts.any_uncertain? || @facts.size > 60 # sacrifice a bit of accuracy for runtime
 
     DISPLAY.call 'inferring'
-    DISPLAY.call @uncertain_facts.size
-    new_facts = Set.new
-    @uncertain_facts.each { |n| @uncertain_facts.each { |m| new_facts |= n.infer(m).reject(&:empty?) } }
-    # inferences are not commutative
-    add_new_facts(new_facts)
+    DISPLAY.call @facts.size
+    @facts.make_inferences
   end
 
   # attempts to add a set of facts to the fact heap, returns true if at least one was successfully added, else false
-  def add_new_facts(new_facts)
-    fact_added = false
-    new_facts.each { |fact| fact_added = add_fact(fact) || fact_added }
-    fact_added
+  def add_new_facts(set_of_facts)
+    @facts.add_all(set_of_facts)
   end
 
   # remove empty or excessively large facts from the fact heap
   def prune
-    @uncertain_facts.delete_if(&:empty?)
-    @certain_facts.delete_if(&:empty?)
-
-    prune_large_facts unless @global_fact_added
+    @facts.prune
+    @facts.prune_large unless @global_fact_added
     # remove large facts after making inferences from the global fact to prevent uncertain_facts size from exploding
-  end
-
-  def prune_large_facts
-    @uncertain_facts.delete_if { |fact| fact.size > 8 }
   end
 
   # choose one of the safest guesses from the available knowledge and add it to the move queue
   # todo non-naive guessing
   def add_safest_guess_to_queue
-    safest_fact = create_global_fact
-    @uncertain_facts.each { |fact| safest_fact = fact if safest_fact.safety < fact.safety }
-    @move_queue.push(Move.new(safest_fact.random_cell, false))
+    @move_queue.push(Move.new(@facts.safest_fact(create_global_fact).random_cell, false))
   end
 
   # add all the moves represented by the set of certain facts to the move queue
   def load_certain_moves_to_queue
-    moves = Set.new
-    @certain_facts.each { |fact| fact.cells.each { |cell| moves.add(Move.new(cell, fact.safety.zero?)) } }
-    @move_queue.concat moves.to_a
+    @move_queue.concat @facts.certain_moves
   end
 
   # add a fact to the heap
@@ -162,7 +128,7 @@ class GeekPlayer < Player
     raise 'Expected a fact' unless fact.is_a? Fact
     return false if fact.empty?
 
-    fact.certain? ? @certain_facts.add?(fact) : @uncertain_facts.add?(fact)
+    @facts.add(fact)
   end
 
   # attempt to add the global board state to the known facts, possibly opening up new inferences
