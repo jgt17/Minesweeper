@@ -4,6 +4,10 @@ require './display'
 
 # implements a binary heap of Facts on an Array
 # certainty is considered first, then safety
+
+############################
+### Outmoded by FactHash ###
+############################
 class FactHeap
   include Displays
   def initialize

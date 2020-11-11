@@ -10,10 +10,10 @@ module Displays
   # blank display, print nothing. mostly for performance testing
   def self.blank_display(obj); end
 
-  # todo graphical display?
+  # TODO: graphical display?
 
   # display mode
-  DISPLAY = method :text_display
+  DISPLAY = method :blank_display
 end
 
 # visual display at some point?

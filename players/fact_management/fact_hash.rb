@@ -71,17 +71,19 @@ class FactHash
     safest_fact
   end
 
-  def certain_moves
+  def pop_certain_moves
     moves = Set.new
     @certain_facts.each { |fact| fact.cells.each { |cell| moves.add(Move.new(cell, fact.safety.zero?)) } }
+    @certain_facts = Set.new
     moves.to_a
   end
 
   def to_s
     str = +"Certain Facts: \n"
-    str += @certain_facts.to_a.to_s
+    @certain_facts.each { |fact| str += "#{fact}\n" }
     str += "\nUncertain Facts: \n"
-    str += @uncertain_facts.to_a.to_s
+    @uncertain_facts.each { |fact| str += "#{fact}\n" }
+    str
   end
 
   private

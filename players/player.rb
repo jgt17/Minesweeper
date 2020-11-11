@@ -9,13 +9,12 @@ require_relative '../game_resources/tripped_mine_error'
 class Player
   include Displays
   def initialize
-    @dummy_minefield = Minefield.new(1, 0)
-    @minefield = @dummy_minefield
+    @minefield = nil
   end
 
   # play the given minefield
   def play(minefield)
-    raise 'Already playing a game!' unless @minefield == @dummy_minefield
+    raise 'Already playing a game!' unless @minefield.nil?
 
     setup(minefield)
     DISPLAY.call @minefield
@@ -71,7 +70,7 @@ class Player
 
   # reset the player state to prepare for a new game
   def clean_up
-    @minefield = @dummy_minefield
+    @minefield = nil
   end
 
   # end of methods to be overwritten, the ones below should be left alone

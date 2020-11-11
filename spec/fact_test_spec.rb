@@ -3,7 +3,7 @@
 # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/ClassLength
 
 require 'minitest/autorun'
-require './fact'
+require '../players/fact_management/fact'
 
 class FactTest < Minitest::Test
   def test_initialize

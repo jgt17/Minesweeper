@@ -2,7 +2,7 @@
 
 require 'set'
 require_relative '../cell'
-require './display'
+require_relative '../../display'
 require_relative '../tripped_mine_error'
 require_relative './minefield_validation_utilities'
 
@@ -98,20 +98,11 @@ class Minefield
   end
 
   def all_cells
-    all = Set.new
-    @minefield.each { |cell| all.add(cell) }
-    all
+    Set.new(@minefield)
   end
 
   def hidden_and_unflagged_cells
     Set.new(@minefield.reject { |cell| cell.revealed? || cell.flagged? })
-  end
-
-  def certain_moves
-    moves = Set.new
-    @certain_facts.each { |fact| fact.cells.each { |cell| moves.add(Move.new(cell, fact.safety.zero?)) } }
-    @certain_facts = Set.new
-    moves
   end
 
   private
@@ -134,10 +125,7 @@ class Minefield
   # tell each cell who its neighbors are
   # overwritten for each different type of minefield
   def assign_neighbors
-    (0...@num_cells - 1).each do |i|
-      @minefield[i].add_neighbor(@minefield[i + 1])
-      @minefield[i + 1].add_neighbor(@minefield[i])
-    end
+    raise 'Unimplemented minefield topology!'
   end
 
   # additional configuration checks for specific types of minefield
@@ -161,8 +149,6 @@ class Minefield
 
   # continue revealing cells as long as they have no neighboring mines
   def cascade_reveal(cell)
-    cell.neighbors.each do |n|
-      reveal(n) unless n.revealed?
-    end
+    cell.neighbors.each { |n| reveal(n) unless n.revealed? }
   end
 end

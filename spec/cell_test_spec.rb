@@ -3,7 +3,7 @@
 # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/ClassLength
 
 require 'minitest/autorun'
-require './cell'
+require '../game_resources/cell'
 
 class CellTest < Minitest::Test
   def test_initialize
